@@ -235,8 +235,13 @@
         async function cargarMovimientos() {
             try {
                 const respuesta = await fetch('/api/movimientos');
-                movimientos = await respuesta.json();
-                actualizarUI();
+                const nuevosMovimientos = await respuesta.json();
+                
+                // Comparamos si hay cambios para no redibujar la pantalla sin necesidad (evita parpadeos)
+                if (JSON.stringify(movimientos) !== JSON.stringify(nuevosMovimientos)) {
+                    movimientos = nuevosMovimientos;
+                    actualizarUI();
+                }
             } catch (error) {
                 console.error("Error al cargar los datos:", error);
             }
@@ -374,10 +379,14 @@
         }
 
         // --- INICIAR APP ---
+        // --- INICIAR APP ---
         window.onload = () => {
             mostrarFechaEnCabecera();
             iniciarReloj();
             cargarMovimientos(); // Traemos los datos al abrir la página
+            
+            // NUEVO: Pide actualizaciones al servidor cada 3 segundos (3000 milisegundos)
+            setInterval(cargarMovimientos, 3000);
         };
     </script>
 </body>
